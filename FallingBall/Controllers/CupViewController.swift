@@ -120,7 +120,7 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
         
     }
     
-    func addBall() {
+    func addBalls() {
         //Balls
         for _ in 0..<1 {
             let ball = BallView.getInstance()
@@ -140,10 +140,26 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
         }
     }
     
+    func addBall(center: CGPoint, withBGColor bgColor: UIColor) {
+        let ball = BallView.getInstance(bgColor)
+        ball.center = center
+        self.view.addSubview(ball)
+        self.ballArray.addObject(ball)
+        
+        let pushBehavior = UIPushBehavior(items: [ball], mode: UIPushBehaviorMode.Instantaneous)
+        pushBehavior.magnitude = 1.5
+        pushBehavior.angle = CGFloat(M_PI / 2)
+        self.animator.addBehavior(pushBehavior)
+        
+        self.gravityBehavior.addItem(ball)
+        self.collisionBehavior.addItem(ball)
+        self.ballBehavior.addItem(ball)
+    }
+    
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if !self.hasAddBall {
             self.hasAddBall = true
-            self.addBall()
+            self.addBalls()
         }
     }
     
@@ -163,6 +179,12 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
 //                let velocity = self.ballBehavior.linearVelocityForItem(item)
                 
                 FBCBPeripheralManager.sharedManager.sendData([kBallDataX: NSNumber(double: Double(item.center.x)), kBallDataY: NSNumber(double: Double(item.center.y))])
+                
+                self.gravityBehavior.removeItem(item)
+                self.collisionBehavior.removeItem(item)
+                self.ballBehavior.addItem(item)
+                self.ballArray.removeObject(item)
+                (item as! BallView).removeFromSuperview()
             }
         }
     }
@@ -170,6 +192,13 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
     // MARK: - FBCBCentralManagerDelegate
     func centralManager(centralManager: FBCBCentralManager, didReceiveDataDict dataDict: NSDictionary?) {
         NSLog("cupViewCon: receive data dict: \(dataDict)".green)
+        
+        if let ballData = dataDict {
+            let x: Double = (ballData.objectForKey(kBallDataX)! as! NSNumber).doubleValue
+            let y: Double = (ballData.objectForKey(kBallDataY)! as! NSNumber).doubleValue
+            
+            self.addBall(CGPointMake(CGFloat(x), CGFloat(y)), withBGColor: UIColor.blackColor())
+        }
     }
     
     func centralManager(centralManager: FBCBCentralManager, connectedPeripheral peripheral: CBPeripheral, didUpdateNotificationStateForCharacteristic characteristic: CBCharacteristic, error: NSError?) {

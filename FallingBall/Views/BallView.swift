@@ -35,6 +35,12 @@ class BallView: UIView {
         return ball
     }
     
+    static func getInstance(bgColor: UIColor) -> BallView {
+        let ball = BallView.getInstance()
+        ball.backgroundColor = bgColor
+        return ball
+    }
+    
     convenience init() {
         self.init(frame: CGRectMake(0, 0, BALLW, BALLW))
     }
