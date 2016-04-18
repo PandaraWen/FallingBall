@@ -160,10 +160,9 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
 //                ballModel.center.x = Float(item.center.x)
 //                ballModel.center.y = Float(item.center.y)
 //                ballModel.velocity.value = item.
-
+//                let velocity = self.ballBehavior.linearVelocityForItem(item)
+                
                 FBCBPeripheralManager.sharedManager.sendData([kBallDataX: NSNumber(double: Double(item.center.x)), kBallDataY: NSNumber(double: Double(item.center.y))])
-                let point = self.ballBehavior.linearVelocityForItem(item)
-                NSLog("\(point.x), \(point.y)")
             }
         }
     }
