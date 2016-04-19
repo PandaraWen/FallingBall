@@ -122,7 +122,7 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
     
     func addBalls() {
         //Balls
-        for _ in 0..<1 {
+        for _ in 0..<3 {
             let ball = BallView.getInstance()
             ball.center = CGPointMake(ScreenSize.width / 2.0, ScreenSize.height / 2.0)
             self.view.addSubview(ball)
@@ -177,14 +177,19 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
 //                ballModel.center.y = Float(item.center.y)
 //                ballModel.velocity.value = item.
 //                let velocity = self.ballBehavior.linearVelocityForItem(item)
+                let ball: BallView = item as! BallView
                 
-                FBCBPeripheralManager.sharedManager.sendData([kBallDataX: NSNumber(double: Double(item.center.x)), kBallDataY: NSNumber(double: Double(item.center.y))])
+                FBCBPeripheralManager.sharedManager.sendData([
+                    kBallDataXScale: NSNumber(double: Double(item.center.x / ScreenSize.width)),
+                    kBallDataY: NSNumber(double: Double(item.center.y)),
+                    kBallDataColor: FBLayoutToolKit.hexStringFromColor(ball.backgroundColor!)
+                ])
                 
                 self.gravityBehavior.removeItem(item)
                 self.collisionBehavior.removeItem(item)
                 self.ballBehavior.addItem(item)
                 self.ballArray.removeObject(item)
-                (item as! BallView).removeFromSuperview()
+                ball.removeFromSuperview()
             }
         }
     }
@@ -194,10 +199,17 @@ class CupViewController: UIViewController, UICollisionBehaviorDelegate, FBCBCent
         NSLog("cupViewCon: receive data dict: \(dataDict)".green)
         
         if let ballData = dataDict {
-            let x: Double = (ballData.objectForKey(kBallDataX)! as! NSNumber).doubleValue
-            let y: Double = (ballData.objectForKey(kBallDataY)! as! NSNumber).doubleValue
+            var xScale: Double = (ballData.objectForKey(kBallDataXScale)! as! NSNumber).doubleValue
+            xScale = 1 - xScale
+            var x: Double = Double(ScreenSize.width) * xScale;
+            x = min(x, Double(ScreenSize.width - BALLW / 2.0))
+            x = max(x, Double(BALLW / 2.0))
             
-            self.addBall(CGPointMake(CGFloat(x), CGFloat(y)), withBGColor: UIColor.blackColor())
+            let y: Double = (ballData.objectForKey(kBallDataY)! as! NSNumber).doubleValue
+            let colorHexString = ballData.objectForKey(kBallDataColor)! as! String
+            let bgColor: UIColor = FBLayoutToolKit.colorWithHexString(colorHexString)
+            
+            self.addBall(CGPointMake(CGFloat(x), CGFloat(y)), withBGColor: bgColor)
         }
     }
     

@@ -13,9 +13,8 @@ let EOM = "EOM"
 let NOTIFY_MTU = 20
 
 let kBallDataCenter = "center"
-let kBallDataX = "x"
+let kBallDataXScale = "x"
 let kBallDataY = "y"
-
 let kBallDataColor = "color"
 let kBallDataR = "r"
 let kBallDataG = "g"
